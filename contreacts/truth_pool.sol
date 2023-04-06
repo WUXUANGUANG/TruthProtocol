@@ -40,7 +40,8 @@ contract Voting {
     mapping(string => mapping(uint256 => mapping(uint256 => poolTrade))) public web_pool_trade;
 
     mapping(address => mapping(string => mapping(uint256 => mapping(bool => uint256)))) public userVotes;
-    
+    //mapping(address => uint256) public userVoteTimes;
+
     //event VoteCast(address indexed user, string website, uint256 amount, bool isUpvote);
     //event TokensUnlocked(address indexed user, uint256 amount);
 
@@ -97,10 +98,9 @@ contract Voting {
     }
 
 
-    function getUserDetails(string memory website,uint256 delivery_date) public view returns (uint256 upvotes, uint256 downvotes,uint256 pool_trade_times) {
+    function getUserDetails(address user_address,string memory website,uint256 delivery_date) public view returns (uint256 upvotes, uint256 downvotes) {
         
-        poolState storage pool_state = web_pool_state[website][delivery_date];
-        return (pool_state.upvotes, pool_state.downvotes,pool_state.pool_trade_times);
+        return (userVotes[user_address][website][delivery_date][true], userVotes[user_address][website][delivery_date][false]);
 
     }
 
@@ -138,10 +138,14 @@ contract Voting {
     function isFutureDate(uint256 date) public view returns (bool) {
         // solidity没有内置时间日期函数，精确的未来判断在函数datetime内，为了方便逻辑实现优先在这里选择直接类出来。
         require(date > block.timestamp, "Date should be in the future");
+        //require(date == 1688054400 || date == 1696003200 || date == 1703952000, "Date should be the end of the quarter");
         require(date == 1688054400 || date == 1696003200 || date == 1703952000, "Date should be the end of the quarter");
         return true;
     }
 
 }
 
+
+//用户个人地址遍历？//
+//一级域名正则化筛选？//
 
