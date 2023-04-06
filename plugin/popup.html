@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+      #phishing-site-warning {
+        background-color: #ff2e2e;
+        color: white;
+        display: none;
+        font-size: 16px;
+        margin-bottom: 15px;
+        padding: 10px;
+      }
+
+      body {
+        width: 300px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 15px;
+        background-color: #222;
+      }
+
+      #number {
+        font-size: 100px;
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin-bottom: 15px;
+        color: #80D31A;
+      }
+
+      h2 {
+        font-size: 20px;
+        margin-bottom: 10px;
+        margin-top: 20px;
+        color: #80D31A;
+      }
+
+      button {
+        background-color: #80D31A;
+        border: 1px solid #80D31A;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 10px;
+        padding: 10px;
+        text-align: center;
+        width: 100%;
+      }
+
+
+      button:hover {
+        background-color: #1c7430;
+      }
+      
+
+
+      a {
+        color: #80D31A;
+      }
+
+      a:hover {
+        color: #1c7430;
+      }
+
+      .red {
+        color: #ff2e2e;
+      }
+
+      .yellow {
+        color: #ffb800;
+      }
+
+      .green {
+        color: #3fd13f;
+      }
+
+      
+    </style>
+  </head>
+  <body>
+    <div id="phishing-site-warning">警告：您正在访问一个被标记为钓鱼网站的页面！</div>
+    <h1>风险网站检测</h1>
+    <div id="number"></div>
+    <button id="add-phishing-site" class="btn-lg" >添加钓鱼网站</button>
+    <button id="remove-phishing-site" class="btn-lg" >添加安全网站</button>
+    <br>
+    <a href="http://127.0.0.1:3000/rank" target="_blank" id="view-ranking-link">查看钓鱼网站排行榜</a>
+    <!-- Add Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

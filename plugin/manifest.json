@@ -1,0 +1,32 @@
+{
+  "manifest_version": 2,
+  "name": "钓鱼网站检测",
+  "version": "1.0",
+  "description": "检测和标记钓鱼网站",
+  "permissions": [
+    "tabs",
+    "storage",
+    "activeTab",
+    "notifications",
+    "background"
+  ],
+  "web_accessible_resources": [
+    "ranking.html", "ranking.css", "ranking.js","injected_script.js"
+  ],
+  "browser_action": {
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "512": "icon.png"
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}

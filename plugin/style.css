@@ -1,0 +1,15 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 15px;
+    width: 300px;
+  }
+  
+  h1 {
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+  
+  button {
+    margin-top: 10px;
+  }
+  
