@@ -1,0 +1,10 @@
+# 以下三行忽略所有没有扩展名的文件，必须放最前面
+# *
+# !/**/
+# !*.*
+
+# pcTrade.*
+webapp/node_modules/*
+
+.idea/
+.DS_Store

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>风险网站排行榜</title>
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Add Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Add vue js-->
+    <script src="https://unpkg.com/vue@next"></script>
+    <style>
+        body {
+            background-color: #222;
+            font-family: Arial, sans-serif;
+            color: #28a745;
+        }
+
+        .table-dark {
+            background-color: #333;
+        }
+
+        .table-dark th,
+        .table-dark td {
+            border-color: #28a745;
+        }
+
+        .container {
+            margin-top: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .navbar-brand {
+            color: #28a745;
+            position: relative;
+        }
+
+        .navbar-brand img {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 70px;
+    }
+
+        .btn-connect {
+            background-color: #28a745;
+            border: none;
+            color: white;
+        }
+        .form-control,
+        .custom-select {
+            background-color: #333;
+            color: #28a745;
+            border-color: #28a745;
+        }
+        .list-group {
+            width: 50%; /* 设置宽度 */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .list-group-item {
+            background-color: #333;
+            color: #28a745;
+            border-color: #28a745;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="app">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#"><img src="images/icon.png" alt="Logo" height="50"></a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <button class="btn btn-connect" @click="connectWallet">{{buttonText}}</button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <input type="text" class="form-control" placeholder="url:">
+            </div>
+        </div>
+        <br>
+        <div class="row">
+              <ul class="list-group mb-3">
+                <li class="list-group-item d-flex justify-content-between lh-sm">
+                  <div>
+                    <h6 class="my-0">质押人数:</h6>
+                  </div>
+                  <span class="text-muted">10</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between lh-sm">
+                  <div>
+                    <h6 class="my-0">垃圾质押代币量:</h6>
+                  </div>
+                  <span class="text-muted">1000</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between lh-sm">
+                  <div>
+                    <h6 class="my-0">安全质押代币量:</h6>
+                  </div>
+                  <span class="text-muted">10</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <div class="text-success">
+                    <h6 class="my-0">当前保费利率:</h6>
+                  </div>
+                  <span class="text-success">10%</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>评分:</span>
+                  <strong>20</strong>
+                </li>
+              </ul>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-sm ml-5">
+                <input type="number" class="form-control" placeholder="输入代币数量">
+            </div>
+            <div class="col-sm ml-5">
+                <select class="custom-select">
+                    <option selected>选择到期时间</option>
+                    <option value="1">4月1日</option>
+                    <option value="2">8月1日</option>
+                    <option value="3">12月1日</option>
+                </select>
+            </div>
+            <div class="col-sm ml-5">
+                <button class="btn btn-connect">确认标记为垃圾</button>
+            </div>
+        </div>
+        <br>
+        <div class="row justify-content-center">
+            <div class="col-sm ml-5">
+                <input type="number" class="form-control" placeholder="输入代币数量">
+            </div>
+            <div class="col-sm ml-5">
+                <select class="custom-select">
+                    <option selected>选择到期时间</option>
+                    <option value="1">4月1日</option>
+                    <option value="2">8月1日</option>
+                    <option value="3">12月1日</option>
+                </select>
+            </div>
+            <div class="col-sm ml-5">
+                <button class="btn btn-connect">确认标记为安全</button>
+            </div>
+        </div>
+        <br>
+        <h1 class="text-center">风险网站排行榜</h1>
+        <table class="table table-dark table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">排名</th>
+                    <th scope="col">顶级域名</th>
+                    <th scope="col">垃圾质押</th>
+                    <th scope="col">安全质押</th>
+                    <th scope="col">保费利率</th>
+                    <th scope="col">安全评分</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">1</th>
+                    <td>张三</td>
+                    <td>95</td>
+                    <td>95</td>
+                    <td>95</td>
+                    <td>95</td>
+                </tr>
+                <tr>
+                    <th scope="row">2</th>
+                    <td>张三</td>
+                    <td>95</td>
+                    <td>95</td>
+                    <td>95</td>
+                    <td>95</td>
+                </tr>
+                <tr>
+                    <th scope="row">3</th>
+                    <td>张三</td>
+                    <td>95</td>
+                    <td>95</td>
+                    <td>95</td>
+                    <td>95</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    isConnected: false,
+                    buttonText: '连接钱包',
+                };
+            },
+            methods: {
+                async connectWallet() {
+                    if (typeof window.ethereum !== 'undefined') {
+                    try {
+                        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                        this.isConnected = accounts.length > 0;
+                        this.buttonText = this.isConnected ? '个人质押' : '连接钱包';
+                    } catch (error) {
+                        console.error('连接失败', error);
+                    }
+                    } else {
+                        alert('请先安装 MetaMask 插件');
+                    }
+                    // try {
+                    //     // 模拟连接 MetaMask
+                    //     await new Promise((resolve) => setTimeout(resolve, 1000));
+                    //     this.isConnected = !this.isConnected;
+                    //     this.buttonText = this.isConnected ? '个人质押' : '连接钱包';
+                    // } catch (error) {
+                    //     console.error('连接失败', error);
+                    // }
+                },
+            },
+        });
+    
+        app.mount('#app');
+    </script>
+    
+</body>
+</html>
