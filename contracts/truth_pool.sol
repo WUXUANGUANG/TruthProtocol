@@ -1,34 +1,3 @@
-Skip to content
-Search or jump to…
-Pull requests
-Issues
-Codespaces
-Marketplace
-Explore
- 
-@takiAA 
-bravesigner
-/
-TruthProtocol
-Public
-Fork your own copy of bravesigner/TruthProtocol
-Code
-Issues
-Pull requests
-Actions
-Projects
-Wiki
-Security
-Insights
-TruthProtocol/contracts/truth_pool.sol
-@wizcs
-wizcs feat:部署版本合约
-Latest commit 7807597 15 minutes ago
- History
- 1 contributor
-780 lines (680 sloc)  28.2 KB
- 
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -809,18 +778,3 @@ contract CDP {
 
 //用户个人地址遍历？//
 //一级域名正则化筛选？//
-Footer
-© 2023 GitHub, Inc.
-Footer navigation
-Terms
-Privacy
-Security
-Status
-Docs
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
-TruthProtocol/truth_pool.sol at main · bravesigner/TruthProtocol
