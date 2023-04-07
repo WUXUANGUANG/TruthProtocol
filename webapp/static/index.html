@@ -10,6 +10,8 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Add web3 js-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.6.1/web3.min.js"></script>
     <!-- Add vue js-->
     <script src="https://unpkg.com/vue@next"></script>
     <style>
@@ -89,7 +91,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-6 mx-auto">
-                <input type="text" class="form-control" placeholder="url:">
+                <input type="text" class="form-control" placeholder="url:" v-model="currentUrl">
             </div>
         </div>
         <br>
@@ -99,19 +101,19 @@
                   <div>
                     <h6 class="my-0">质押人数:</h6>
                   </div>
-                  <span class="text-muted">10</span>
+                  <span class="text-muted">{{websiteInfo.pool_trade_times}}</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between lh-sm">
                   <div>
                     <h6 class="my-0">垃圾质押代币量:</h6>
                   </div>
-                  <span class="text-muted">1000</span>
+                  <span class="text-muted">{{websiteInfo.downvotes}}</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between lh-sm">
                   <div>
                     <h6 class="my-0">安全质押代币量:</h6>
                   </div>
-                  <span class="text-muted">10</span>
+                  <span class="text-muted">{{websiteInfo.upvotes}}</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
                   <div class="text-success">
@@ -121,41 +123,42 @@
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
                   <span>评分:</span>
-                  <strong>20</strong>
+                  <strong>{{websiteInfo.score}}</strong>
                 </li>
               </ul>
         </div>
         <div class="row justify-content-center">
             <div class="col-sm ml-5">
-                <input type="number" class="form-control" placeholder="输入代币数量">
+                <input type="number" class="form-control" v-model="downTokenAmount" placeholder="输入代币数量">
             </div>
             <div class="col-sm ml-5">
-                <select class="custom-select">
+                <select v-model="downSelectedOption" class="custom-select">
+                    <!-- 到期日期应该动态变化-->
                     <option selected>选择到期时间</option>
-                    <option value="1">4月1日</option>
-                    <option value="2">8月1日</option>
-                    <option value="3">12月1日</option>
+                    <option value=1688054400>4月31日</option>
+                    <option value=1696003200>6月30日</option>
+                    <option value=1703952000>9月30日</option>
                 </select>
             </div>
             <div class="col-sm ml-5">
-                <button class="btn btn-connect">确认标记为垃圾</button>
+                <button class="btn btn-connect" @click="callStakeMyTokenToDown">确认标记为垃圾</button>
             </div>
         </div>
         <br>
         <div class="row justify-content-center">
             <div class="col-sm ml-5">
-                <input type="number" class="form-control" placeholder="输入代币数量">
+                <input type="number" class="form-control" v-model="upTokenAmount" placeholder="输入代币数量">
             </div>
             <div class="col-sm ml-5">
-                <select class="custom-select">
+                <select v-model="upSelectedOption" class="custom-select">
                     <option selected>选择到期时间</option>
-                    <option value="1">4月1日</option>
-                    <option value="2">8月1日</option>
-                    <option value="3">12月1日</option>
+                    <option value=1688054400>4月31日</option>
+                    <option value=1696003200>6月30日</option>
+                    <option value=1703952000>9月30日</option>
                 </select>
             </div>
             <div class="col-sm ml-5">
-                <button class="btn btn-connect">确认标记为安全</button>
+                <button class="btn btn-connect" @click="callStakeMyTokenToUp">确认标记为安全</button>
             </div>
         </div>
         <br>
@@ -172,29 +175,13 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <th scope="row">1</th>
-                    <td>张三</td>
-                    <td>95</td>
-                    <td>95</td>
-                    <td>95</td>
-                    <td>95</td>
-                </tr>
-                <tr>
-                    <th scope="row">2</th>
-                    <td>张三</td>
-                    <td>95</td>
-                    <td>95</td>
-                    <td>95</td>
-                    <td>95</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td>张三</td>
-                    <td>95</td>
-                    <td>95</td>
-                    <td>95</td>
-                    <td>95</td>
+                <tr v-for="(item,index) in websiteRank" :key="index">
+                    <th scope="row">{{index + 1}}</th>
+                    <td>{{ item.url }}</td>
+                    <td>{{ item.downvotes }}</td>
+                    <td>{{ item.upvotes }}</td>
+                    <td>{{ item.pool_trade_times }}</td>
+                    <td>{{ item.score }}</td>
                 </tr>
             </tbody>
         </table>
@@ -202,14 +189,712 @@
 </div>
 
     <script>
+        const contractABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "contract IERC20",
+				"name": "_token",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_minStake",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "unlockTokens",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "website",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "delivery_date",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "isUpvote",
+				"type": "bool"
+			}
+		],
+		"name": "voteMyStake",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "get_other_score",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "other_score1",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "get_trust_score",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "trust_score1",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "website",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "delivery_date",
+				"type": "uint256"
+			}
+		],
+		"name": "getPoolDetails",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "upvotes",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "downvotes",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "pool_trade_times",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "user_address",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "website",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "delivery_date",
+				"type": "uint256"
+			}
+		],
+		"name": "getUserDetails",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "upvotes",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "downvotes",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "date",
+				"type": "uint256"
+			}
+		],
+		"name": "isFutureDate",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "minStake",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "other_score",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "token",
+		"outputs": [
+			{
+				"internalType": "contract IERC20",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "trust_score",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"name": "userVotes",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "web_pool_state",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "upvotes",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "downvotes",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "pool_trade_times",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "web_pool_trade",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "trade_address",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "trade_timestamp",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "trust_score",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "other_score",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "isUpvote",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+        const erc20ABI=[
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
+			}
+		],
+		"name": "Approval",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
+			}
+		],
+		"name": "Transfer",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			}
+		],
+		"name": "allowance",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "approve",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "balanceOf",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "decimals",
+		"outputs": [
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "subtractedValue",
+				"type": "uint256"
+			}
+		],
+		"name": "decreaseAllowance",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_recipient",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_amount",
+				"type": "uint256"
+			}
+		],
+		"name": "faucet",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "spender",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "addedValue",
+				"type": "uint256"
+			}
+		],
+		"name": "increaseAllowance",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "name",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "symbol",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalSupply",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "transfer",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "transferFrom",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]        
+        const contractAddress = '0x7f803587ab6832958E408FBbDA7343766d5a8e05';
+        const erc20Address="0x4Ce25d2350C00eba579373e399B0FA8E4b2Db7F4"
+        var host="http://127.0.0.1:3001"
+        function getQueryStringParameters() {
+            const queryString = window.location.search.substring(1);
+            console.log(queryString)
+            const queryParams = {};
+            const pairs = queryString.split("&");
+
+            for (let i = 0; i < pairs.length; i++) {
+                const pair = pairs[i].split("=");
+                queryParams[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+            }
+            console.log(queryParams)
+            return queryParams;
+        }
+
         const app = Vue.createApp({
             data() {
                 return {
                     isConnected: false,
                     buttonText: '连接钱包',
+                    currentUrl: '',
+                    upTokenAmount: 0,
+                    downTokenAmount: 0,
+                    upSelectedOption: 0,
+                    downSelectedOption: 0,
+                    websiteRank: [],
+                    websiteInfo: {}
                 };
             },
+            mounted() {
+                const queryParams = getQueryStringParameters();
+                console.log(queryParams.attachUrl);
+                this.currentUrl = queryParams.attachUrl;
+                this.fetchWebsiteRank().then(()=>{
+                    this.initListGroup()
+                });
+                
+                // 3s刷新一次
+                setInterval(()=>{
+                    this.fetchWebsiteRank();
+                },3000);
+            },
             methods: {
+                initListGroup(){
+                    for (var i=0;i<this.websiteRank.length;i++){
+                        alert(this.getTopLevelDomain(this.currentUrl))
+                        alert(this.websiteRank[i].url)
+                        if (this.websiteRank[i].url==this.getTopLevelDomain(this.currentUrl)){
+                            this.websiteInfo=this.websiteRank[i]
+                        }
+                    }
+                },
+                fetchWebsiteRank(){
+                    // 使用fetch()获取数据 返回 promise
+                    return fetch(host+'/api/getBannedUrlList')
+                    .then((response) => {
+                        if (!response.ok) {
+                        throw new Error('网络错误');
+                        }
+                        return response.json();
+                    })
+                    .then((data) => {
+                        console.log(data.data)
+                        this.websiteRank = data.data;
+                    })
+                    .catch((error) => {
+                        console.error('获取数据失败:', error);
+                    });
+                },
                 async connectWallet() {
                     if (typeof window.ethereum !== 'undefined') {
                     try {
@@ -222,17 +907,101 @@
                     } else {
                         alert('请先安装 MetaMask 插件');
                     }
-                    // try {
-                    //     // 模拟连接 MetaMask
-                    //     await new Promise((resolve) => setTimeout(resolve, 1000));
-                    //     this.isConnected = !this.isConnected;
-                    //     this.buttonText = this.isConnected ? '个人质押' : '连接钱包';
-                    // } catch (error) {
-                    //     console.error('连接失败', error);
-                    // }
+                },
+                async callStakeMyTokenToDown() {
+                    if (!this.isConnected) {
+                        alert('请先连接钱包');
+                        return;
+                    }
+                    // 创建Web3实例
+                    const web3 = new Web3(window.ethereum);
+                    // 代币大小
+                    tokenTicker="000000000000000000"
+                    //erc20
+                    const erc20Contract=new web3.eth.Contract(erc20ABI, erc20Address);
+                    const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+                    // 从钱包获取当前地址
+                    const accounts = await web3.eth.getAccounts();
+                    const currentAccount = accounts[0];
+
+                    // 质押数量
+                    console.log(this.downTokenAmount)
+                    const stakeAmount=this.downTokenAmount+tokenTicker
+                    console.log(stakeAmount)
+                    // 调用智能合约函数
+                    try {
+                        await erc20Contract.methods.approve(contractAddress, stakeAmount).send({ from: currentAccount });
+                        await contract.methods.voteMyStake(this.getTopLevelDomain(this.currentUrl), this.downSelectedOption, stakeAmount, false).send({ from: currentAccount });
+                        console.log('合约函数调用成功'+this.getTopLevelDomain(this.currentUrl));
+                        this.addBannedUrl()
+                    } catch (error) {
+                        alert("合约函数调用失败")
+                        console.error('合约函数调用失败', error);
+                    }
+                },
+                async callStakeMyTokenToUp() {
+                    if (!this.isConnected) {
+                        alert('请先连接钱包');
+                        return;
+                    }
+                    // 创建Web3实例
+                    const web3 = new Web3(window.ethereum);
+                    // 代币大小
+                    tokenTicker="000000000000000000"
+                    const erc20Contract=new web3.eth.Contract(erc20ABI, erc20Address);
+                    // 用ABI和合约地址创建合约实例
+                    const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+                    // 从钱包获取当前地址
+                    const accounts = await web3.eth.getAccounts();
+                    const currentAccount = accounts[0];
+
+                    // 质押数量
+                    const stakeAmount=this.upTokenAmount+tokenTicker
+                    console.log(stakeAmount)
+                    // 调用智能合约函数
+                    try {
+                        await erc20Contract.methods.approve(contractAddress, stakeAmount).send({ from: currentAccount });
+                        await contract.methods.voteMyStake(this.getTopLevelDomain(this.currentUrl), this.upSelectedOption, stakeAmount, true).send({ from: currentAccount });
+                        this.addBannedUrl()
+                        console.log('合约函数调用成功'+this.getTopLevelDomain(this.currentUrl));
+                    } catch (error) {
+                        alert("合约函数调用失败")
+                        console.error('合约函数调用失败', error);
+                    }
+                },
+                async addBannedUrl() {
+                    try {
+                        let attachUrl=this.getTopLevelDomain(this.currentUrl);
+                        console.log("upload:"+attachUrl);
+                        const response = await fetch(host+`/api/addBannedUrl?attachUrl=${encodeURIComponent(attachUrl)}`);
+                    if (response.ok) {
+                        const message = await response.text();
+                        alert(message);
+                    } else {
+                        const error = await response.text();
+                        alert(`请求失败: ${error}`);
+                    }
+                    } catch (error) {
+                    console.error('请求错误:', error);
+                    alert('请求错误');
+                    }
+                    },
+                    getTopLevelDomain(url) {
+                        try {
+                            const hostname = new URL(url).hostname;
+                            const domainParts = hostname.split('.');
+                            const topLevelDomain = domainParts.slice(-2).join('.');
+                            return topLevelDomain;
+                        } catch (error) {
+                            console.error('无效的 URL:', error);
+                            return '';
+                        }
+                    }
                 },
             },
-        });
+        );
     
         app.mount('#app');
     </script>

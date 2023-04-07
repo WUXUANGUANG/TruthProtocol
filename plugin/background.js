@@ -167,14 +167,14 @@
     
     function sendRequest(){
       const xhr = new XMLHttpRequest();
-      xhr.open('GET' , "http://127.0.0.1:3000/api/getBannedUrlList")
+      xhr.open('GET' , "http://127.0.0.1:3001/api/getBannedUrlList")
       xhr.onreadystatechange = function() {
         if (xhr.readyState == 4 && xhr.status == 200) {
           bannedUrlList=[]
           const response = JSON.parse(xhr.responseText) || [];
           // 获取插件存储的网站
           for (var i= 0; i< response.data.length;i++){
-            bannedUrlList.push({url:response.data[i],score: 0,count:0})
+            bannedUrlList.push({url:response.data[i].url,score: response.data[i].score,count:response.data[i].pool_trade_times})
           }
           console.log(bannedUrlList);
         }

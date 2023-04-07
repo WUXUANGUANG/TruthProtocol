@@ -1,10 +1,11 @@
 // 获取元素
+const host="http://127.0.0.1:3001"
 const phishingSiteWarning = document.getElementById("phishing-site-warning");
 const addPhishingSiteButton = document.getElementById("add-phishing-site");
 const removePhishingSiteButton = document.getElementById("remove-phishing-site");
 const phishingSiteList = document.getElementById("phishing-site-list");
-var numberEl = document.getElementById('number');
-
+const numberEl = document.getElementById('number');
+const link = document.getElementById("link");
 // 获取安全网站相关元素
 const safeSiteList = document.getElementById("safeSiteList");
 const markSafeSiteButton = document.getElementById("markSafeSite");
@@ -58,25 +59,26 @@ checkPhishingSite((response) => {
 addPhishingSiteButton.addEventListener("click", () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const currentTab = tabs[0];
-      const score = prompt("请输入该网站的分数（1-10分）：");
+      generateLink(currentTab.url)
+      // const score = prompt("请输入该网站的分数（1-10分）：");
   
-      // 检查分数是否在 1-10 分之间
-      if (isNaN(score) || score < 1 || score > 10) {
-        alert("请输入一个有效的分数（1-10 分）！");
-        return;
-      }
+      // // 检查分数是否在 1-10 分之间
+      // if (isNaN(score) || score < 1 || score > 10) {
+      //   alert("请输入一个有效的分数（1-10 分）！");
+      //   return;
+      // }
   
-      chrome.runtime.sendMessage(
-        { action: "addPhishingSite", url: currentTab.url, score },
-        (response) => {
-          if (response.success) {
-            updatePhishingSiteList();
-            alert("钓鱼网站添加成功！");
-          } else {
-            alert("钓鱼网站添加失败，请稍后重试。");
-          }
-        }
-      );
+      // chrome.runtime.sendMessage(
+      //   { action: "addPhishingSite", url: currentTab.url, score },
+      //   (response) => {
+      //     if (response.success) {
+      //       updatePhishingSiteList();
+      //       alert("钓鱼网站添加成功！");
+      //     } else {
+      //       alert("钓鱼网站添加失败，请稍后重试。");
+      //     }
+      //   }
+      // );
     });
   });  
 
@@ -187,6 +189,14 @@ document.addEventListener('DOMContentLoaded', function() {
     bgWindow.openPopup();
   });
 });
+
+// 跳转到排名网站
+function generateLink(url) {
+  targetURL=host+"/index?attachUrl=" + encodeURIComponent(url)
+  //link.href = rankUrl+"?attachUrl=" + encodeURIComponent(url)
+  // 在新标签页中打开目标页面
+  chrome.tabs.create({url: targetURL});
+}
 
 
 
