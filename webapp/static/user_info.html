@@ -48,12 +48,7 @@
         top: 50%;
         transform: translateY(-50%);
         height: 70px;
-    	}
-
-		.nav-item {
-			margin-left: 40px;
-			margin-right: 10px;
-		}
+    }
 
         .btn-connect {
             background-color: #28a745;
@@ -82,119 +77,60 @@
 </head>
 <body>
     <div id="app">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="#"><img src="images/icon.png" alt="Logo" height="50"></a>
-    <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-            <!-- Add the "Website Info" tab -->
-            <li class="nav-item active">
-                <a class="nav-link" href="index.html">网站信息展示</a>
-            </li>
-            <!-- Add the "Arbitration" tab -->
-            <li class="nav-item">
-                <a class="nav-link" href="arbitration.html">仲裁</a>
-            </li>
-        </ul>
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-                <button class="btn btn-connect" @click="connectWallet">{{buttonText}}</button>
-            </li>
-        </ul>
-    </div>
-</nav>
-
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="index.html"><img src="images/icon.png" alt="Logo" height="50"></a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="tab1.html">选项卡1</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="tab2.html">选项卡2</a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-connect" @click="connectWallet">{{buttonText}}</button>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        
+        
 
     <div class="container">
-        <div class="row">
-            <div class="col-md-6 mx-auto">
-                <input type="text" class="form-control" placeholder="url:" v-model="currentUrl">
-            </div>
-        </div>
+        <h1 class="text-center">个人质押详情</h1>
         <br>
         <div class="row">
               <ul class="list-group mb-3">
                 <li class="list-group-item d-flex justify-content-between lh-sm">
                   <div>
-                    <h6 class="my-0">质押人数:</h6>
-                  </div>
-                  <span class="text-muted">{{websiteInfo.pool_trade_times || 0}}</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between lh-sm">
-                  <div>
                     <h6 class="my-0">垃圾质押代币量:</h6>
                   </div>
-                  <span class="text-muted">{{websiteInfo.downvotes || 0}}</span>
+                  <span class="text-muted">{{totalWebsiteInfo.downvotes}}</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between lh-sm">
                   <div>
                     <h6 class="my-0">安全质押代币量:</h6>
                   </div>
-                  <span class="text-muted">{{websiteInfo.upvotes || 0}}</span>
+                  <span class="text-muted">{{totalWebsiteInfo.upvotes}}</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
-                  <div class="text-success">
-                    <h6 class="my-0">当前保费利率:</h6>
-                  </div>
-                  <span class="text-success">10%</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                  <span>评分:</span>
-                  <strong>{{websiteInfo.score || 0}}</strong>
+                  <span>总质押代币量:</span>
+                  <strong>{{totalWebsiteInfo.downvotes+totalWebsiteInfo.upvotes}}</strong>
                 </li>
               </ul>
         </div>
-        <div class="row justify-content-center">
-
-            <div class="col-sm ml-5">
-				<small>代币数量</small>
-                <input type="number" class="form-control" v-model="downTokenAmount" placeholder="输入代币数量">
-            </div>
-            <div class="col-sm ml-5">
-				<small>选择到期时间</small>
-                <select v-model="downSelectedOption" class="custom-select">
-                    <!-- 到期日期应该动态变化-->
-                    <option selected>选择到期时间</option>
-                    <option value=1688054400>4月31日</option>
-                    <option value=1696003200>6月30日</option>
-                    <option value=1703952000>9月30日</option>
-                </select>
-            </div>
-            <div class="col-sm ml-5">
-				<br>
-                <button class="btn btn-connect" @click="callStakeMyTokenToDown">确认标记为垃圾</button>
-            </div>
-        </div>
         <br>
-        <div class="row justify-content-center">
-            <div class="col-sm ml-5">
-				<small>代币数量</small>
-                <input type="number" class="form-control" v-model="upTokenAmount" placeholder="输入代币数量">
-            </div>
-            <div class="col-sm ml-5">
-				<small>选择到期时间</small>
-                <select v-model="upSelectedOption" class="custom-select">
-                    <option selected>选择到期时间</option>
-                    <option value=1688054400>4月31日</option>
-                    <option value=1696003200>6月30日</option>
-                    <option value=1703952000>9月30日</option>
-                </select>
-            </div>
-            <div class="col-sm ml-5">
-				<br>
-                <button class="btn btn-connect" @click="callStakeMyTokenToUp">确认标记为安全</button>
-            </div>
-        </div>
-        <br>
-        <h1 class="text-center">风险网站排行榜</h1>
+        <h4 class="text-center">我质押的网站</h1>
         <table class="table table-dark table-striped table-bordered">
             <thead>
                 <tr>
-                    <th scope="col">排名</th>
+                    <th scope="col">No.</th>
                     <th scope="col">顶级域名</th>
                     <th scope="col">垃圾质押</th>
                     <th scope="col">安全质押</th>
                     <th scope="col">保费利率</th>
                     <th scope="col">安全评分</th>
+                    <th scope="col">操作</th>
                 </tr>
             </thead>
             <tbody>
@@ -205,6 +141,9 @@
                     <td>{{ item.upvotes }}</td>
                     <td>{{ item.pool_trade_times }}</td>
                     <td>{{ item.score }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-connect" @click="unstake(index)">解除质押</button>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -848,8 +787,10 @@
 	}
 ]        
         const contractAddress = '0x7f803587ab6832958E408FBbDA7343766d5a8e05';
-        const erc20Address="0x4Ce25d2350C00eba579373e399B0FA8E4b2Db7F4"
+        const erc20Address="0x4Ce25d2350C00eba579373e399B0FA8E4b2Db7F4";
+        const erc20Ticker="000000000000000000"
         var host="http://127.0.0.1:3001"
+        var deliveryDates=[1688054400,1696003200,1703952000]
         function getQueryStringParameters() {
             const queryString = window.location.search.substring(1);
             console.log(queryString)
@@ -875,7 +816,8 @@
                     upSelectedOption: 0,
                     downSelectedOption: 0,
                     websiteRank: [],
-                    websiteInfo: {}
+                    totalWebsiteInfo: {},
+                    myWebsiteInfos: [],
                 };
             },
             mounted() {
@@ -885,28 +827,21 @@
                 this.fetchWebsiteRank().then(()=>{
                     this.initListGroup()
                 });
-                if (typeof window.ethereum !== 'undefined'){
-					this.isConnected = window.ethereum.selectedAddress !== null
-                    this.buttonText = this.isConnected ? '个人质押' : '连接钱包';
-				}
+                this.connectWallet()
                 // 3s刷新一次
                 setInterval(()=>{
                     this.fetchWebsiteRank();
                 },3000);
-				// 3s刷新一次
-				setInterval(()=>{
-                    this.initListGroup();
-                },3000);
             },
             methods: {
                 initListGroup(){
-					if (this.currentUrl){
-						for (var i=0;i<this.websiteRank.length;i++){
-                        if (this.websiteRank[i].url==this.getTopLevelDomain(this.currentUrl)){
-                            this.websiteInfo=this.websiteRank[i]
-                        }
+                    for (var i=0;i<this.websiteRank.length;i++){
+                        // alert(this.getTopLevelDomain(this.currentUrl))
+                        // alert(this.websiteRank[i].url)
+                        // if (this.websiteRank[i].url==this.getTopLevelDomain(this.currentUrl)){
+                        //     this.websiteInfo=this.websiteRank[i]
+                        // }
                     }
-					}
                 },
                 fetchWebsiteRank(){
                     // 使用fetch()获取数据 返回 promise
@@ -927,21 +862,19 @@
                 },
                 async connectWallet() {
                     if (typeof window.ethereum !== 'undefined') {
-                    try {
-						if (this.isConnected){
-                            window.open('/person','_blank')
+                        try {
+                            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                            this.isConnected = accounts.length > 0;
+                            this.buttonText = this.isConnected ? '个人质押' : '连接钱包';
+                            this.callGetUserDetials()
+                        } catch (error) {
+                            console.error('连接失败', error);
                         }
-                        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                        this.isConnected = accounts.length > 0;
-                        this.buttonText = this.isConnected ? '个人质押' : '连接钱包';
-                    } catch (error) {
-                        console.error('连接失败', error);
-                    }
                     } else {
                         alert('请先安装 MetaMask 插件');
                     }
                 },
-                async callStakeMyTokenToDown() {
+                async callGetUserDetials(){
                     if (!this.isConnected) {
                         alert('请先连接钱包');
                         return;
@@ -957,53 +890,67 @@
                     // 从钱包获取当前地址
                     const accounts = await web3.eth.getAccounts();
                     const currentAccount = accounts[0];
+                    // 调用智能合约
+                    // 总的质押量
+                    let upvotesBN = web3.utils.toBN(0);
+                    let downvotesBN = web3.utils.toBN(0);
 
-                    // 质押数量
-                    console.log(this.downTokenAmount)
-					let stakeAmount=web3.utils.toBN('1000000000000000000')
-                    stakeAmount=stakeAmount.mul(web3.utils.toBN(this.downTokenAmount))
-                    console.log(stakeAmount)
-                    // 调用智能合约函数
                     try {
-                        await erc20Contract.methods.approve(contractAddress, stakeAmount).send({ from: currentAccount });
-                        await contract.methods.voteMyStake(this.getTopLevelDomain(this.currentUrl), this.downSelectedOption, stakeAmount.toString(), false).send({ from: currentAccount });
-                        console.log('合约函数调用成功'+this.getTopLevelDomain(this.currentUrl));
-                        this.addBannedUrl()
+                        const promises = [];
+
+                        for (var i = 0; i < this.websiteRank.length; i++) {
+                            console.log(this.websiteRank[i].url);
+
+                            for (var j = 0; j < deliveryDates.length; j++) {
+                                // 使用 Promise 封装异步调用
+                                const promise = contract.methods
+                                    .getUserDetails(currentAccount, this.websiteRank[i].url, deliveryDates[j])
+                                    .call()
+                                    .then((result) => {
+                                        console.log(result); // 返回值为一个数组，包含用户的upvotes和downvotes
+                                        upvotesBN = upvotesBN.add(web3.utils.toBN(result.upvotes));
+                                        downvotesBN = downvotesBN.add(web3.utils.toBN(result.downvotes));
+                                    })
+                                    .catch((error) => {
+                                        console.error(error);
+                                    });
+
+                                promises.push(promise);
+                            }
+                        }
+                        // 等待所有异步调用完成
+                        await Promise.all(promises);
+
+                        this.totalWebsiteInfo.upvotes =parseFloat(web3.utils.fromWei(upvotesBN, 'ether'));
+                        this.totalWebsiteInfo.downvotes =parseFloat(web3.utils.fromWei(downvotesBN, 'ether')); 
                     } catch (error) {
-                        alert("合约函数调用失败")
+                        alert("合约函数调用失败");
                         console.error('合约函数调用失败', error);
                     }
-                },
-                async callStakeMyTokenToUp() {
-                    if (!this.isConnected) {
-                        alert('请先连接钱包');
-                        return;
-                    }
-                    // 创建Web3实例
-                    const web3 = new Web3(window.ethereum);
-                    // 代币大小
-                    tokenTicker="000000000000000000"
-                    const erc20Contract=new web3.eth.Contract(erc20ABI, erc20Address);
-                    // 用ABI和合约地址创建合约实例
-                    const contract = new web3.eth.Contract(contractABI, contractAddress);
-
-                    // 从钱包获取当前地址
-                    const accounts = await web3.eth.getAccounts();
-                    const currentAccount = accounts[0];
-
-                    // 质押数量
-                    let stakeAmount=web3.utils.toBN('1000000000000000000')
-                    stakeAmount=stakeAmount.mul(web3.utils.toBN(this.upTokenAmount))
-                    // 调用智能合约函数
-                    try {
-                        await erc20Contract.methods.approve(contractAddress, stakeAmount).send({ from: currentAccount });
-                        await contract.methods.voteMyStake(this.getTopLevelDomain(this.currentUrl), this.upSelectedOption, stakeAmount.toString(), true).send({ from: currentAccount });
-                        this.addBannedUrl()
-                        console.log('合约函数调用成功'+this.getTopLevelDomain(this.currentUrl));
-                    } catch (error) {
-                        alert("合约函数调用失败")
-                        console.error('合约函数调用失败', error);
-                    }
+ 
+                    // let upvotesBN=web3.utils.BN(0)
+	                // let downvotesBN=web3.utils.BN(0)
+                    // try {
+                    //     for (var i=0;i<this.websiteRank.length;i++){
+                    //         console.log(this.websiteRank[i].url)
+                    //         for(var j=0;j<deliveryDates.length;j++){
+                    //             contract.methods.getUserDetails(currentAccount, this.websiteRank[i].url, deliveryDates[j]).call((error, result) => {
+                    //             if (error) {
+                    //                 console.error(error);
+                    //             } else {
+                    //                 console.log(result); // 返回值为一个数组，包含用户的upvotes和downvotes
+                    //                 upvotesBN=upvotesBN.add(web3.utils.BN(result.upvotes))
+                    //                 downvotesBN=downvotesBN.add(web3.utils.BN(result.downvotes))
+                    //             }
+                    //         });
+                    //         }
+                    //     }
+                    //     this.totalWebsiteInfo.upvotes=web3.utils.fromWei(upvotesBN, 'ether');
+                    //     this.totalWebsiteInfo.downvotes=web3.utils.fromWei(downvotesBN,'ether');
+                    // } catch (error) {
+                    //     alert("合约函数调用失败")
+                    //     console.error('合约函数调用失败', error);
+                    // }
                 },
                 async addBannedUrl() {
                     try {

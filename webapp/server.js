@@ -5,8 +5,11 @@ const erc20Ticker="000000000000000000"
 var bannedUrlList=["https://zhuanlan.zhihu.com/p/92667917",
 "https://blog.csdn.net/qq_41618084/article/details/81411314",
 "https://code.z01.com/bootstrap/examples/dashboard/",
-"https://www.baidu.com/","com.hk"]
+"com.hk","baidu.com"]
 //"https://www.google.com.hk/search?q=hardhat%E9%83%A8%E7%BD%B2%E5%88%B0%E6%B5%8B%E8%AF%95%E7%BD%91&newwindow=1&ei=Kl8sZJzOC_Ok2roPguy6qAU&ved=0ahUKEwici-b44JD-AhVzklYBHQK2DlUQ4dUDCA8&uact=5&oq=hardhat%E9%83%A8%E7%BD%B2%E5%88%B0%E6%B5%8B%E8%AF%95%E7%BD%91&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQAzIJCCEQoAEQChAqMgcIIRCgARAKMgcIIRCgARAKOgoIABBHENYEELADOhwIABCKBRDqAhC0AhCKAxC3AxDUAxDVAxDlAhgBOhkIABCKBRDqAhC0AhCKAxC3AxDUAxDlAhgBOgUIABCABDoLCAAQgAQQsQMQgwE6EQguEIAEELEDEIMBEMcBENEDOhQILhCABBCxAxCDARDHARDRAxDUAjoLCC4QgAQQsQMQgwE6CwgAEIoFELEDEIMBOg4ILhCABBCxAxCDARDUAjoECAAQAzoNCC4QigUQxwEQ0QMQQzoICAAQgAQQsQM6CwguEIMBELEDEIAEOg0IABCKBRCxAxCDARBDOgcIABCKBRBDOhMIABANEIAEELEDEIMBELEDEIMBOgcIABANEIAEOgcIABCABBAMOgUIABCiBDoFCCEQoAFKBAhBGABQmQRY2VZg3VdoB3ABeAGAAfABiAGDGJIBBzEwLjE1LjGYAQCgAQGwAQrIAQrAAQHaAQQIARgH&sclient=gws-wiz-serp"]
+
+
+
 
 var deliveryDates=[1688054400,1696003200,1703952000]
 var websiteRank=[]
@@ -353,6 +356,9 @@ const contractABI = [
 const contractAddress = "0x7f803587ab6832958E408FBbDA7343766d5a8e05"; // 智能合约地址
 const web3 = new Web3(new Web3.providers.HttpProvider('https://rpc-mumbai.maticvigil.com/')); // 替换为您的Ethereum节点URL
 const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+
+
 async function fetchPoolDetails() {
   var websiteInfos = []
   for (var i=0;i<bannedUrlList.length;i++){
@@ -362,6 +368,8 @@ async function fetchPoolDetails() {
     websiteInfo.downvotes=0
     websiteInfo.pool_trade_times=0
     websiteInfo.score=0
+	let upvotesBN=web3.utils.toBN(0)
+	let downvotesBN=web3.utils.toBN(0)
     for (var j=0;j<deliveryDates.length;j++){
       try {
         const result = await contract.methods.getPoolDetails(bannedUrlList[i], deliveryDates[j]).call();
@@ -369,17 +377,20 @@ async function fetchPoolDetails() {
         if (result.pool_trade_times=='0'){
           continue;
         }
-        websiteInfo.upvotes+=parseInt(result.upvotes.replace(erc20Ticker,''));
-        websiteInfo.downvotes+=parseInt(result.downvotes.replace(erc20Ticker,''));
+		upvotesBN=upvotesBN.add(web3.utils.toBN(result.upvotes))
+		downvotesBN=downvotesBN.add(web3.utils.toBN(result.downvotes))
         websiteInfo.pool_trade_times+=parseInt(result.pool_trade_times);
         websiteInfo.score+=i;
         console.log(websiteInfo);
-        websiteInfos.push(websiteInfo);
       } catch (error) {
         console.error("Error fetching pool details:", error);
         break
       }
     }
+	websiteInfo.upvotes=web3.utils.fromWei(upvotesBN, 'ether');
+	websiteInfo.downvotes=web3.utils.fromWei(downvotesBN, 'ether');
+
+	websiteInfos.push(websiteInfo);
   }
   console.log(websiteInfos)
   websiteRank=websiteInfos
@@ -420,13 +431,25 @@ app.get('/index', (req, res) => {
   res.sendFile(__dirname+"/static/index.html")
 });
 
+// 处理 GET /index 路径请求
+app.get('/person', (req, res) => {
+  // 返回一个简单的 HTML 页面，显示个人信息
+  res.sendFile(__dirname+"/static/user_info.html")
+});
+
 app.get('/api/addBannedUrl',(req,res)=>{
   // 解析url
   // 加入数组
   const url = req.query.attachUrl;
   if (url){
-    bannedUrlList.push(url);
-    res.send(`URL "${url}" 已加入到屏蔽列表。`)
+	  for(var i=0;i<bannedUrlList.length;i++){
+		  if (url==bannedUrlList[i]){
+			res.send(`URL "${url}" 已加入到屏蔽列表。`)
+			return
+		  }
+		bannedUrlList.push(url);
+    	res.send(`URL "${url}" 已加入到屏蔽列表。`)
+	  }
   }else{
     res.status(400).send('缺少 "url" 参数。');
   }

@@ -7,6 +7,20 @@
       { url: "https://example1.com", score: 6, count: 1 }
     ];
     
+
+  function getTopLevelDomain(url) {
+      try {
+          const hostname = new URL(url).hostname;
+          const domainParts = hostname.split('.');
+          const topLevelDomain = domainParts.slice(-2).join('.');
+          return topLevelDomain;
+      } catch (error) {
+          console.error('无效的 URL:', error);
+          return '';
+      }
+  }
+
+
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
       if (request.action === "addPhishingSite") {
@@ -68,8 +82,9 @@
             phishingSites=phishingSites.concat(bannedUrlList)
             let isPhishingSite=false
             let bannedScore=0
+            topDomin=getTopLevelDomain(currentTab.url)
             for (var i=0;i<phishingSites.length;i++){
-              if(phishingSites[i].url == currentTab.url){
+              if(phishingSites[i].url == topDomin){
                 
                 isPhishingSite=true
                 bannedScore=phishingSites[i].score
