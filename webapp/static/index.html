@@ -951,7 +951,7 @@
                     if (typeof window.ethereum !== 'undefined') {
                     try {
 						if (this.isConnected){
-                            window.open('/person','_blank')
+                            window.open('/user_info.html','_blank')
                         }
                         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                         this.isConnected = accounts.length > 0;
