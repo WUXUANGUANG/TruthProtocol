@@ -149,7 +149,7 @@
                   <div class="text-success">
                     <h6 class="my-0">当前保费利率:</h6>
                   </div>
-                  <span class="text-success">10%</span>
+                  <span class="text-success">6%</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
                   <span>评分:</span>
@@ -218,7 +218,7 @@
                     <td>{{ item.url }}</td>
                     <td>{{ item.downvotes }}</td>
                     <td>{{ item.upvotes }}</td>
-                    <td>{{ item.pool_trade_times }}</td>
+                    <td>{{ item.pool_trade_times+4 }}%</td>
                     <td>{{ item.score }}</td>
 					<td>
                         <button class="btn btn-sm btn-connect" @click="toStake(item.url)">参与质押</button>
@@ -865,8 +865,8 @@
 		"type": "function"
 	}
 ]        
-        const contractAddress = '0x7f803587ab6832958E408FBbDA7343766d5a8e05';
-        const erc20Address="0x4Ce25d2350C00eba579373e399B0FA8E4b2Db7F4"
+        const contractAddress = '0x1B92CfB91b0B4B35057aC877A4804e887b9cFD57'
+        const erc20Address="0xB14D91Ca3EBDb73A6A9915bDee5c17b3dC2Bc3A8"
         var host="http://127.0.0.1:3001"
         function getQueryStringParameters() {
             const queryString = window.location.search.substring(1);

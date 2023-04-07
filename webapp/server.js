@@ -2,7 +2,9 @@
 const express = require('express');
 const Web3 = require('web3');
 const erc20Ticker="000000000000000000"
-var bannedUrlList=[]
+let rpc='https://rpc-mumbai.maticvigil.com/'
+rpc='https://alpha-rpc.scroll.io/l2'
+var bannedUrlList=['zor.com']
 //"https://www.google.com.hk/search?q=hardhat%E9%83%A8%E7%BD%B2%E5%88%B0%E6%B5%8B%E8%AF%95%E7%BD%91&newwindow=1&ei=Kl8sZJzOC_Ok2roPguy6qAU&ved=0ahUKEwici-b44JD-AhVzklYBHQK2DlUQ4dUDCA8&uact=5&oq=hardhat%E9%83%A8%E7%BD%B2%E5%88%B0%E6%B5%8B%E8%AF%95%E7%BD%91&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQAzIJCCEQoAEQChAqMgcIIRCgARAKMgcIIRCgARAKOgoIABBHENYEELADOhwIABCKBRDqAhC0AhCKAxC3AxDUAxDVAxDlAhgBOhkIABCKBRDqAhC0AhCKAxC3AxDUAxDlAhgBOgUIABCABDoLCAAQgAQQsQMQgwE6EQguEIAEELEDEIMBEMcBENEDOhQILhCABBCxAxCDARDHARDRAxDUAjoLCC4QgAQQsQMQgwE6CwgAEIoFELEDEIMBOg4ILhCABBCxAxCDARDUAjoECAAQAzoNCC4QigUQxwEQ0QMQQzoICAAQgAQQsQM6CwguEIMBELEDEIAEOg0IABCKBRCxAxCDARBDOgcIABCKBRBDOhMIABANEIAEELEDEIMBELEDEIMBOgcIABANEIAEOgcIABCABBAMOgUIABCiBDoFCCEQoAFKBAhBGABQmQRY2VZg3VdoB3ABeAGAAfABiAGDGJIBBzEwLjE1LjGYAQCgAQGwAQrIAQrAAQHaAQQIARgH&sclient=gws-wiz-serp"]
 
 
@@ -350,8 +352,8 @@ const contractABI = [
 		"type": "function"
 	}
 ];
-const contractAddress = "0x7f803587ab6832958E408FBbDA7343766d5a8e05"; // 智能合约地址
-const web3 = new Web3(new Web3.providers.HttpProvider('https://rpc-mumbai.maticvigil.com/')); // 替换为您的Ethereum节点URL
+const contractAddress = "0x1B92CfB91b0B4B35057aC877A4804e887b9cFD57"
+const web3 = new Web3(new Web3.providers.HttpProvider(rpc)); // 替换为您的Ethereum节点URL
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 
