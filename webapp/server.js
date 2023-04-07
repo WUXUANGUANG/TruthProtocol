@@ -2,10 +2,7 @@
 const express = require('express');
 const Web3 = require('web3');
 const erc20Ticker="000000000000000000"
-var bannedUrlList=["https://zhuanlan.zhihu.com/p/92667917",
-"https://blog.csdn.net/qq_41618084/article/details/81411314",
-"https://code.z01.com/bootstrap/examples/dashboard/",
-"com.hk","baidu.com"]
+var bannedUrlList=[]
 //"https://www.google.com.hk/search?q=hardhat%E9%83%A8%E7%BD%B2%E5%88%B0%E6%B5%8B%E8%AF%95%E7%BD%91&newwindow=1&ei=Kl8sZJzOC_Ok2roPguy6qAU&ved=0ahUKEwici-b44JD-AhVzklYBHQK2DlUQ4dUDCA8&uact=5&oq=hardhat%E9%83%A8%E7%BD%B2%E5%88%B0%E6%B5%8B%E8%AF%95%E7%BD%91&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQAzIJCCEQoAEQChAqMgcIIRCgARAKMgcIIRCgARAKOgoIABBHENYEELADOhwIABCKBRDqAhC0AhCKAxC3AxDUAxDVAxDlAhgBOhkIABCKBRDqAhC0AhCKAxC3AxDUAxDlAhgBOgUIABCABDoLCAAQgAQQsQMQgwE6EQguEIAEELEDEIMBEMcBENEDOhQILhCABBCxAxCDARDHARDRAxDUAjoLCC4QgAQQsQMQgwE6CwgAEIoFELEDEIMBOg4ILhCABBCxAxCDARDUAjoECAAQAzoNCC4QigUQxwEQ0QMQQzoICAAQgAQQsQM6CwguEIMBELEDEIAEOg0IABCKBRCxAxCDARBDOgcIABCKBRBDOhMIABANEIAEELEDEIMBELEDEIMBOgcIABANEIAEOgcIABCABBAMOgUIABCiBDoFCCEQoAFKBAhBGABQmQRY2VZg3VdoB3ABeAGAAfABiAGDGJIBBzEwLjE1LjGYAQCgAQGwAQrIAQrAAQHaAQQIARgH&sclient=gws-wiz-serp"]
 
 
@@ -389,20 +386,11 @@ async function fetchPoolDetails() {
     }
 	websiteInfo.upvotes=web3.utils.fromWei(upvotesBN, 'ether');
 	websiteInfo.downvotes=web3.utils.fromWei(downvotesBN, 'ether');
-
 	websiteInfos.push(websiteInfo);
   }
   console.log(websiteInfos)
+  console.log(bannedUrlList)
   websiteRank=websiteInfos
-  // const website = bannedUrlList[2]; // 替换为您要查询的网站
-  // const delivery_date = deliveryDates[0]; // 替换为您要查询的交割日期
-
-  // try {
-  //   const result = await contract.methods.getPoolDetails(website, delivery_date).call();
-  //   console.log("Pool Details:", result);
-  // } catch (error) {
-  //   console.error("Error fetching pool details:", error);
-  // }
 }
 fetchPoolDetails()
 
@@ -447,9 +435,9 @@ app.get('/api/addBannedUrl',(req,res)=>{
 			res.send(`URL "${url}" 已加入到屏蔽列表。`)
 			return
 		  }
-		bannedUrlList.push(url);
-    	res.send(`URL "${url}" 已加入到屏蔽列表。`)
 	  }
+	bannedUrlList.push(url);
+    res.send(`URL "${url}" 已加入到屏蔽列表。`)
   }else{
     res.status(400).send('缺少 "url" 参数。');
   }

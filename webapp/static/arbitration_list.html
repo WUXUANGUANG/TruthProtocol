@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>风险网站排行榜</title>
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Add Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Add web3 js-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.6.1/web3.min.js"></script>
+    <!-- Add vue js-->
+    <script src="https://unpkg.com/vue@next"></script>
+    <style>
+        body {
+            background-color: #222;
+            font-family: Arial, sans-serif;
+            color: #28a745;
+        }
+		
+		.dropdown-menu {
+			background-color: #343a40; /* 导航栏背景颜色 */
+		}
+
+		.dropdown-item {
+			color: #ffffff; /* 文本颜色 */
+		}
+
+        .table-dark {
+            background-color: #333;
+        }
+
+        .table-dark th,
+        .table-dark td {
+            border-color: #28a745;
+        }
+
+        .container {
+            margin-top: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .navbar-brand {
+            color: #28a745;
+            position: relative;
+        }
+
+        .navbar-brand img {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 70px;
+    	}
+
+		.nav-item {
+			margin-left: 40px;
+			margin-right: 10px;
+		}
+
+        .btn-connect {
+            background-color: #28a745;
+            border: none;
+            color: white;
+        }
+        .form-control,
+        .custom-select {
+            background-color: #333;
+            color: #28a745;
+            border-color: #28a745;
+        }
+        .list-group {
+            width: 50%; /* 设置宽度 */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .list-group-item {
+            background-color: #333;
+            color: #28a745;
+            border-color: #28a745;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="app">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#"><img src="images/icon.png" alt="Logo" height="50"></a>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <!-- Add the "Website Info" tab -->
+            <li class="nav-item">
+                <a class="nav-link" href="index.html">网站信息展示</a>
+            </li>
+            <!-- Add the "Arbitration" tab -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  仲裁
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="initiate_arbitration.html">发起仲裁</a>
+                    <a class="dropdown-item" href="participate_arbitration.html">参与仲裁</a>
+                </div>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <button class="btn btn-connect" @click="connectWallet">{{buttonText}}</button>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
+    <div class="container">
+        <br>
+       
+        <h1 class="text-center">仲裁列表</h1>
+        <table class="table table-dark table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">正在仲裁的url</th>
+                    <th scope="col">危险仲裁代币数量</th>
+                    <th scope="col">安全仲裁代币数量</th>
+                    <th scope="col">仲裁剩余时间</th>
+                    <th scope="col">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">https://ftx.com/</th>
+                    <td>1200</td>
+                    <td>1000</td>
+                    <td>3h5min40s</td>
+                    <td>
+                        <button class="btn btn-sm btn-connect" onclick="navigateToUrl('participate_arbitration.html')">参与仲裁</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+    <script>
+        function navigateToUrl(url) {
+        window.location.href = url
+        }
+    </script>
+</body>
+</html>

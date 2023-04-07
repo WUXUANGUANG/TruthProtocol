@@ -20,6 +20,14 @@
             font-family: Arial, sans-serif;
             color: #28a745;
         }
+		
+		.dropdown-menu {
+			background-color: #343a40; /* 导航栏背景颜色 */
+		}
+
+		.dropdown-item {
+			color: #ffffff; /* 文本颜色 */
+		}
 
         .table-dark {
             background-color: #333;
@@ -87,12 +95,18 @@
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
             <!-- Add the "Website Info" tab -->
-            <li class="nav-item active">
+            <li class="nav-item">
                 <a class="nav-link" href="index.html">网站信息展示</a>
             </li>
             <!-- Add the "Arbitration" tab -->
-            <li class="nav-item">
-                <a class="nav-link" href="arbitration.html">仲裁</a>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  仲裁
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="initiate_arbitration.html">发起仲裁</a>
+                    <a class="dropdown-item" href="participate_arbitration.html">参与仲裁</a>
+                </div>
             </li>
         </ul>
         <ul class="navbar-nav ml-auto">
@@ -195,6 +209,7 @@
                     <th scope="col">安全质押</th>
                     <th scope="col">保费利率</th>
                     <th scope="col">安全评分</th>
+					<th scope="col">操作</th>
                 </tr>
             </thead>
             <tbody>
@@ -205,6 +220,9 @@
                     <td>{{ item.upvotes }}</td>
                     <td>{{ item.pool_trade_times }}</td>
                     <td>{{ item.score }}</td>
+					<td>
+                        <button class="btn btn-sm btn-connect" @click="toStake(item.url)">参与质押</button>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -899,6 +917,10 @@
                 },3000);
             },
             methods: {
+				toStake(url) {
+					this.currentUrl = url;
+					window.scrollTo(0, 0);
+				},
                 initListGroup(){
 					if (this.currentUrl){
 						for (var i=0;i<this.websiteRank.length;i++){

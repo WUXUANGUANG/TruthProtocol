@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>风险网站排行榜</title>
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Add Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Add web3 js-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.6.1/web3.min.js"></script>
+    <!-- Add vue js-->
+    <script src="https://unpkg.com/vue@next"></script>
+    <style>
+        body {
+            background-color: #222;
+            font-family: Arial, sans-serif;
+            color: #28a745;
+        }
+		
+		.dropdown-menu {
+			background-color: #343a40; /* 导航栏背景颜色 */
+		}
+
+		.dropdown-item {
+			color: #ffffff; /* 文本颜色 */
+		}
+
+        .table-dark {
+            background-color: #333;
+        }
+
+        .table-dark th,
+        .table-dark td {
+            border-color: #28a745;
+        }
+
+        .container {
+            margin-top: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .navbar-brand {
+            color: #28a745;
+            position: relative;
+        }
+
+        .navbar-brand img {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 70px;
+    	}
+
+		.nav-item {
+			margin-left: 40px;
+			margin-right: 10px;
+		}
+
+        .btn-connect {
+            background-color: #28a745;
+            border: none;
+            color: white;
+        }
+        .form-control,
+        .custom-select {
+            background-color: #333;
+            color: #28a745;
+            border-color: #28a745;
+        }
+        .list-group {
+            width: 50%; /* 设置宽度 */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .list-group-item {
+            background-color: #333;
+            color: #28a745;
+            border-color: #28a745;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="app">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#"><img src="images/icon.png" alt="Logo" height="50"></a>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <!-- Add the "Website Info" tab -->
+            <li class="nav-item">
+                <a class="nav-link" href="index.html">网站信息展示</a>
+            </li>
+            <!-- Add the "Arbitration" tab -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  仲裁
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="initiate_arbitration.html">发起仲裁</a>
+                    <a class="dropdown-item" href="participate_arbitration.html">参与仲裁</a>
+                </div>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <button class="btn btn-connect" @click="connectWallet">个人质押</button>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
+    <div class="container">
+        <br>
+        <br>
+        <br>
+        <h2 class="text-center">我要发起DAO仲裁</h2>
+        <br>
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <input type="text" class="form-control" placeholder="url:" value="https://ftx.com/" v-model="currentUrl">
+            </div>
+        </div>
+        <br>
+        <div class="row">
+              <ul class="list-group mb-3">
+                <li class="list-group-item d-flex justify-content-between lh-sm">
+                  <div>
+                    <h6 class="my-0">垃圾质押代币量:</h6>
+                  </div>
+                  <span class="text-success">600</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between lh-sm">
+                  <div>
+                    <h6 class="my-0">安全质押代币量:</h6>
+                  </div>
+                  <span class="text-success">400</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <div class="text-success">
+                    <h6 class="my-0">到期剩余时间:</h6>
+                  </div>
+                  <span class="text-success">10days</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>发起仲裁所需代币:</span>
+                  <strong>500</strong>
+                </li>
+              </ul>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-sm d-flex justify-content-center">
+				<br>
+                <button class="btn btn-connect" onclick="navigateToUrl('arbitration_list.html')">确认发起仲裁</button>
+            </div>
+        </div>
+        <br>
+        <br>
+    </div>
+</div>
+<script>
+    function navigateToUrl(url) {
+        window.location.href = url
+        }
+</script>
+</body>
+</html>
