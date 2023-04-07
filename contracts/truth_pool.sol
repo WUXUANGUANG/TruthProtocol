@@ -4,11 +4,8 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-
-contract Voting {
-
+contract CDP {
     using SafeMath for uint256;
-
 
     IERC20 public token;
     uint256 public minStake;
@@ -34,12 +31,12 @@ contract Voting {
         uint256 upvotes;
         uint256 downvotes;
         uint256 pool_trade_times;
-        uint pool_state;
+        uint256 pool_state;
     }
 
     struct userState {
         uint256 upvotes;
-        uint256 downvotes; 
+        uint256 downvotes;
         //uint256 pool_trade_nums;
         uint256 extracted_premium;
         uint256 extracetd_interest;
@@ -85,13 +82,14 @@ contract Voting {
 
     //function get_staking_reward():
 
-    function changePoolState(string memory website, uint256 delivery_date,uint external_state) public {
-
+    function changePoolState(
+        string memory website,
+        uint256 delivery_date,
+        uint256 external_state
+    ) public {
         //这里先改成一个人人可以调用的,后面将接入仲裁机制与CMD体系
         web_pool_state[website][delivery_date].pool_state = external_state;
-
     }
-
 
     function voteMyStake(
         string memory website,
@@ -128,11 +126,9 @@ contract Voting {
         pool_trade.other_score = get_other_score();
 
         if (isUpvote) {
-            userVotes[msg.sender][website][delivery_date].upvotes +=
-                amount;
+            userVotes[msg.sender][website][delivery_date].upvotes += amount;
         } else {
-            userVotes[msg.sender][website][delivery_date].downvotes +=
-                amount;
+            userVotes[msg.sender][website][delivery_date].downvotes += amount;
         }
 
         //lockedTokens[msg.sender].push(LockedToken(amount, block.timestamp + lockPeriod));
@@ -173,8 +169,6 @@ contract Voting {
         string memory website,
         uint256 delivery_date
     )
-
-//这里有个错，可能会在一定特殊情况下触发双向的扣费，之后改。
         public
         view
         returns (
@@ -205,35 +199,31 @@ contract Voting {
             if (user_s_up_principal < user_s_down_principal) {
                 user_up_premium +=
                     (user_up_principal *
-                        (
-                            web_pool_trade[website][delivery_date][i]
-                                .trade_timestamp - last_user_timestamp)) /
+                        (web_pool_trade[website][delivery_date][i]
+                            .trade_timestamp - last_user_timestamp)) /
                     (delivery_date - last_user_timestamp);
 
-                user_up_principal -= 
+                user_up_principal -=
                     (user_up_principal *
-                        (
-                            web_pool_trade[website][delivery_date][i]
-                                .trade_timestamp - last_user_timestamp)) /
+                        (web_pool_trade[website][delivery_date][i]
+                            .trade_timestamp - last_user_timestamp)) /
                     (delivery_date - last_user_timestamp);
-
             } else {
                 user_down_premium +=
                     (user_down_principal *
-                        (
-                            web_pool_trade[website][delivery_date][i]
-                                .trade_timestamp - last_user_timestamp)) /
+                        (web_pool_trade[website][delivery_date][i]
+                            .trade_timestamp - last_user_timestamp)) /
                     (delivery_date - last_user_timestamp);
 
                 user_down_principal -=
                     (user_down_principal *
-                        (
-                            web_pool_trade[website][delivery_date][i].trade_timestamp - last_user_timestamp)) 
-                            /
+                        (web_pool_trade[website][delivery_date][i]
+                            .trade_timestamp - last_user_timestamp)) /
                     (delivery_date - last_user_timestamp);
             }
 
-            last_user_timestamp = web_pool_trade[website][delivery_date][i].trade_timestamp;
+            last_user_timestamp = web_pool_trade[website][delivery_date][i]
+                .trade_timestamp;
 
             //统计当前位置上的总体质押数量
             if (web_pool_trade[website][delivery_date][i].isUpvote) {
@@ -260,45 +250,33 @@ contract Voting {
                     ][i].amount;
                 }
             }
+        }
 
         uint256 max_time;
         //uint256 sett = delivery_date.max(block.timestamp);
-        if(delivery_date>block.timestamp){
+        if (delivery_date > block.timestamp) {
             max_time = block.timestamp;
-        }else{
+        } else {
             max_time = delivery_date;
         }
 
         if (user_s_up_principal < user_s_down_principal) {
             user_up_premium +=
-                (user_up_principal *
-                    (
-                        max_time - last_user_timestamp
-                        )) /
+                (user_up_principal * (max_time - last_user_timestamp)) /
                 (delivery_date - last_user_timestamp);
 
-            user_up_principal -= 
-                (user_up_principal *
-                    (
-                        max_time- last_user_timestamp)) /
+            user_up_principal -=
+                (user_up_principal * (max_time - last_user_timestamp)) /
                 (delivery_date - last_user_timestamp);
-
         } else {
             user_down_premium +=
-                (user_down_principal *
-                    (
-                        max_time - last_user_timestamp)) /
+                (user_down_principal * (max_time - last_user_timestamp)) /
                 (delivery_date - last_user_timestamp);
 
             user_down_principal -=
-                (user_down_principal *
-                    (
-                        max_time - last_user_timestamp)) /
+                (user_down_principal * (max_time - last_user_timestamp)) /
                 (delivery_date - last_user_timestamp);
         }
-
-        }
-
 
         return (
             //user_up_principal,
@@ -306,56 +284,458 @@ contract Voting {
             user_up_premium,
             user_down_premium
         );
-    } 
+    }
 
     //因为一个用户如果其赢了可以赢得对面的本金和保费，输了会输掉本金也会交保费，所以我们优先计算两侧如果赢了的话会获得的赔付收益。
 
+    //用以计算用户的理论赔付收益
+    function getUsersCompensate(
+        address user_address,
+        string memory website,
+        uint256 delivery_date
+    )
+        public
+        view
+        returns (
+            //uint256 user_up_principal1,
+            //uint256 user_down_principal1,
+            uint256 user_up_Compensate1,
+            uint256 user_down_Compensate1
+        )
+    {
+        //计算单用户在某池截至当前的剩余本金
+        uint256 i;
+        uint256 user_up_principal = 0;
+        uint256 user_down_principal = 0;
+
+        uint256 user_s_up_principal = 0;
+        uint256 user_s_down_principal = 0;
+
+        uint256 user_up_compensate = 0;
+        uint256 user_down_compensate = 0;
+        uint256 last_user_timestamp = 0;
+
+        for (
+            i = 1;
+            i <= web_pool_state[website][delivery_date].pool_trade_times;
+            i += 1
+        ) {
+            //计算截至这笔交易前用户的全部应赔付额度
+            //用户up方向可以收到的预计赔付 和
+
+            if (user_s_up_principal == 0) {
+                user_up_compensate +=
+                    (user_s_down_principal *
+                        user_up_principal * // div(10
+                        (web_pool_trade[website][delivery_date][i]
+                            .trade_timestamp - last_user_timestamp)) /
+                    (delivery_date - last_user_timestamp);
+            } else {
+                user_up_compensate +=
+                    (((user_s_down_principal * user_up_principal) /
+                        user_s_up_principal) *
+                        (web_pool_trade[website][delivery_date][i]
+                            .trade_timestamp - last_user_timestamp)) /
+                    (delivery_date - last_user_timestamp);
+            }
+
+            //用户down方向可以收到的预计赔付 和
+            if (user_s_down_principal == 0) {
+                user_down_compensate +=
+                    (user_s_up_principal *
+                        user_down_principal *
+                        (web_pool_trade[website][delivery_date][i]
+                            .trade_timestamp - last_user_timestamp)) /
+                    (delivery_date - last_user_timestamp);
+            } else {
+                user_down_compensate +=
+                    (((user_s_up_principal * user_down_principal) /
+                        user_s_down_principal) *
+                        (web_pool_trade[website][delivery_date][i]
+                            .trade_timestamp - last_user_timestamp)) /
+                    (delivery_date - last_user_timestamp);
+            }
+
+            // 用户在down方向的剩余本金
+            user_down_principal -=
+                (user_down_principal *
+                    (web_pool_trade[website][delivery_date][i].trade_timestamp -
+                        last_user_timestamp)) /
+                (delivery_date - last_user_timestamp);
+
+            //全体用户在down方向的剩余本金
+            user_s_down_principal -=
+                (user_s_down_principal *
+                    (web_pool_trade[website][delivery_date][i].trade_timestamp -
+                        last_user_timestamp)) /
+                (delivery_date - last_user_timestamp);
+
+            // 用户在up方向的剩余本金
+            user_up_principal -=
+                (user_up_principal *
+                    (web_pool_trade[website][delivery_date][i].trade_timestamp -
+                        last_user_timestamp)) /
+                (delivery_date - last_user_timestamp);
+
+            //全体用户在up方向的剩余本金
+            user_s_up_principal -=
+                (user_s_up_principal *
+                    (web_pool_trade[website][delivery_date][i].trade_timestamp -
+                        last_user_timestamp)) /
+                (delivery_date - last_user_timestamp);
+
+            last_user_timestamp = web_pool_trade[website][delivery_date][i]
+                .trade_timestamp;
+
+            //统计当前位置上的总体质押数量
+            if (web_pool_trade[website][delivery_date][i].isUpvote) {
+                user_s_up_principal += web_pool_trade[website][delivery_date][i]
+                    .amount;
+            } else {
+                user_s_down_principal += web_pool_trade[website][delivery_date][
+                    i
+                ].amount;
+            }
+
+            //统计当前位置上的用户剩余质押资金加上
+            if (
+                web_pool_trade[website][delivery_date][i].trade_address ==
+                user_address
+            ) {
+                if (web_pool_trade[website][delivery_date][i].isUpvote) {
+                    user_up_principal += web_pool_trade[website][delivery_date][
+                        i
+                    ].amount;
+                } else {
+                    user_down_principal += web_pool_trade[website][
+                        delivery_date
+                    ][i].amount;
+                }
+            }
+        }
+
+        uint256 max_time;
+        //uint256 sett = delivery_date.max(block.timestamp);
+        if (delivery_date > block.timestamp) {
+            max_time = block.timestamp;
+        } else {
+            max_time = delivery_date;
+        }
+
+        //用户up方向可以收到的预计赔付 和
+
+        if (user_s_up_principal == 0) {
+            user_up_compensate +=
+                (user_s_down_principal *
+                    user_up_principal * // div(10
+                    (max_time - last_user_timestamp)) /
+                (delivery_date - last_user_timestamp);
+        } else {
+            user_up_compensate +=
+                (((user_s_down_principal * user_up_principal) /
+                    user_s_up_principal) * (max_time - last_user_timestamp)) /
+                (delivery_date - last_user_timestamp);
+        }
+
+        //用户down方向可以收到的预计赔付 和
+        if (user_s_down_principal == 0) {
+            user_down_compensate +=
+                (user_s_up_principal *
+                    user_down_principal *
+                    (max_time - last_user_timestamp)) /
+                (delivery_date - last_user_timestamp);
+        } else {
+            user_down_compensate +=
+                (((user_s_up_principal * user_down_principal) /
+                    user_s_down_principal) * (max_time - last_user_timestamp)) /
+                (delivery_date - last_user_timestamp);
+        }
+
+        // 用户在down方向的剩余本金
+        user_down_principal -=
+            (user_down_principal * (max_time - last_user_timestamp)) /
+            (delivery_date - last_user_timestamp);
+
+        //全体用户在down方向的剩余本金
+        user_s_down_principal -=
+            (user_s_down_principal * (max_time - last_user_timestamp)) /
+            (delivery_date - last_user_timestamp);
+
+        // 用户在up方向的剩余本金
+        user_up_principal -=
+            (user_up_principal * (max_time - last_user_timestamp)) /
+            (delivery_date - last_user_timestamp);
+
+        //全体用户在up方向的剩余本金
+        user_s_up_principal -=
+            (user_s_up_principal * (max_time - last_user_timestamp)) /
+            (delivery_date - last_user_timestamp);
+
+        return (
+            //user_up_principal,
+            //user_down_principal,
+            user_up_compensate,
+            user_down_compensate
+        );
+    }
+
+    //获得用户应该收益的保费
+    function getUsersPremium(
+        address user_address,
+        string memory website,
+        uint256 delivery_date
+    )
+        public
+        view
+        returns (
+            //uint256 user_up_principal1,
+            //uint256 user_down_principal1,
+            uint256 user_up_premium1,
+            uint256 user_down_premium1
+        )
+    {
+        //计算单用户在某池截至当前的剩余本金
+        uint256 i;
+        uint256 user_up_principal = 0;
+        uint256 user_down_principal = 0;
+
+        uint256 user_s_up_principal = 0;
+        uint256 user_s_down_principal = 0;
+
+        uint256 user_up_premium = 0;
+        uint256 user_down_premium = 0;
+        uint256 last_user_timestamp = 0;
+
+        for (
+            i = 1;
+            i <= web_pool_state[website][delivery_date].pool_trade_times;
+            i += 1
+        ) {
+            //当一定情况下才会扣钱，比如一边剩余小于一边的时候
+            if (user_s_up_principal > user_s_down_principal) {
+                //计算截至这笔交易前用户的全部应赔付额度
+                //用户up方向可以收到的预计赔付 和
+                if (user_s_up_principal == 0) {
+                    user_up_premium +=
+                        (user_s_down_principal *
+                            user_up_principal * // div(10
+                            (web_pool_trade[website][delivery_date][i]
+                                .trade_timestamp - last_user_timestamp)) /
+                        (delivery_date - last_user_timestamp);
+                } else {
+                    user_up_premium +=
+                        (((user_s_down_principal * user_up_principal) /
+                            user_s_up_principal) *
+                            (web_pool_trade[website][delivery_date][i]
+                                .trade_timestamp - last_user_timestamp)) /
+                        (delivery_date - last_user_timestamp);
+                }
+
+                // 用户在down方向的剩余本金
+                user_down_principal -=
+                    (user_down_principal *
+                        (web_pool_trade[website][delivery_date][i]
+                            .trade_timestamp - last_user_timestamp)) /
+                    (delivery_date - last_user_timestamp);
+
+                //全体用户在down方向的剩余本金
+                user_s_down_principal -=
+                    (user_s_down_principal *
+                        (web_pool_trade[website][delivery_date][i]
+                            .trade_timestamp - last_user_timestamp)) /
+                    (delivery_date - last_user_timestamp);
 
 
+            } else {
+                //用户down方向可以收到的预计赔付 和
+                if (user_s_down_principal == 0) {
+                    user_down_premium +=
+                        (user_s_up_principal *
+                            user_down_principal *
+                            (web_pool_trade[website][delivery_date][i]
+                                .trade_timestamp - last_user_timestamp)) /
+                        (delivery_date - last_user_timestamp);
+                } else {
+                    user_down_premium +=
+                        (((user_s_up_principal * user_down_principal) /
+                            user_s_down_principal) *
+                            (web_pool_trade[website][delivery_date][i]
+                                .trade_timestamp - last_user_timestamp)) /
+                        (delivery_date - last_user_timestamp);
+                }
 
+                // 用户在up方向的剩余本金
+                user_up_principal -=
+                    (user_up_principal *
+                        (web_pool_trade[website][delivery_date][i]
+                            .trade_timestamp - last_user_timestamp)) /
+                    (delivery_date - last_user_timestamp);
 
+                //全体用户在up方向的剩余本金
+                user_s_up_principal -=
+                    (user_s_up_principal *
+                        (web_pool_trade[website][delivery_date][i]
+                            .trade_timestamp - last_user_timestamp)) /
+                    (delivery_date - last_user_timestamp);
 
+            }
 
+            last_user_timestamp = web_pool_trade[website][delivery_date][i]
+                .trade_timestamp;
 
-    function withdrawPremium(string memory website,uint256 delivery_date) public {
+            //统计当前位置上的总体质押数量
+            if (web_pool_trade[website][delivery_date][i].isUpvote) {
+                user_s_up_principal += web_pool_trade[website][delivery_date][i]
+                    .amount;
+            } else {
+                user_s_down_principal += web_pool_trade[website][delivery_date][
+                    i
+                ].amount;
+            }
+
+            //统计当前位置上的用户剩余质押资金加上
+            if (
+                web_pool_trade[website][delivery_date][i].trade_address ==
+                user_address
+            ) {
+                if (web_pool_trade[website][delivery_date][i].isUpvote) {
+                    user_up_principal += web_pool_trade[website][delivery_date][
+                        i
+                    ].amount;
+                } else {
+                    user_down_principal += web_pool_trade[website][
+                        delivery_date
+                    ][i].amount;
+                }
+            }
+        }
+
+        uint256 max_time;
+        //uint256 sett = delivery_date.max(block.timestamp);
+        if (delivery_date > block.timestamp) {
+            max_time = block.timestamp;
+        } else {
+            max_time = delivery_date;
+        }
+
+        if (user_s_up_principal > user_s_down_principal) {
+            //用户up方向可以收到的预计赔付 和
+
+            if (user_s_up_principal == 0) {
+                user_up_premium +=
+                    (user_s_down_principal *
+                        user_up_principal * // div(10
+                        (max_time - last_user_timestamp)) /
+                    (delivery_date - last_user_timestamp);
+            } else {
+                user_up_premium += 
+                    (((user_s_down_principal * user_up_principal) /
+                        user_s_up_principal) *
+                        (max_time - last_user_timestamp)) /
+                    (delivery_date - last_user_timestamp);
+            }
+
+            // 用户在down方向的剩余本金
+            user_down_principal -=
+                (user_down_principal * (max_time - last_user_timestamp)) /
+                (delivery_date - last_user_timestamp);
+
+            //全体用户在down方向的剩余本金
+            user_s_down_principal -=
+                (user_s_down_principal * (max_time - last_user_timestamp)) /
+                (delivery_date - last_user_timestamp);
+        } else {
+            //用户down方向可以收到的预计赔付 和
+            if (user_s_down_principal == 0) {
+                user_down_premium +=
+                    (user_s_up_principal *
+                        user_down_principal *
+                        (max_time - last_user_timestamp)) /
+                    (delivery_date - last_user_timestamp);
+            } else {
+                user_down_premium +=
+                    (((user_s_up_principal * user_down_principal) /
+                        user_s_down_principal) *
+                        (max_time - last_user_timestamp)) /
+                    (delivery_date - last_user_timestamp);
+            }
+            // 用户在up方向的剩余本金
+            user_up_principal -=
+                (user_up_principal * (max_time - last_user_timestamp)) /
+                (delivery_date - last_user_timestamp);
+
+            //全体用户在up方向的剩余本金
+            user_s_up_principal -=
+                (user_s_up_principal * (max_time - last_user_timestamp)) /
+                (delivery_date - last_user_timestamp);
+        }
+        return (
+            //user_up_principal,
+            //user_down_principal,
+            user_up_premium,
+            user_down_premium
+        );
+    }
+
+    function withdrawPremium(string memory website, uint256 delivery_date)
+        public
+    {
         //提取池子内的保费收入。
 
         uint256 user_can_withdraw_premium_up = 0;
         uint256 user_can_withdraw_premium_down = 0;
-        (user_can_withdraw_premium_up,user_can_withdraw_premium_down) = getUsersPrincipal(msg.sender,website,delivery_date);
-        uint256 amount = user_can_withdraw_premium_up + user_can_withdraw_premium_down - userVotes[msg.sender][website][delivery_date].extracted_premium;
-        
+        (
+            user_can_withdraw_premium_up,
+            user_can_withdraw_premium_down
+        ) = getUsersPrincipal(msg.sender, website, delivery_date);
+        uint256 amount = user_can_withdraw_premium_up +
+            user_can_withdraw_premium_down -
+            userVotes[msg.sender][website][delivery_date].extracted_premium;
+
         token.approve(msg.sender, amount);
         token.transfer(msg.sender, amount);
+        //还需要记录用户的手续费转移到另外的池子
 
-        require(amount>0,"There is no income to draw on");
-        userVotes[msg.sender][website][delivery_date].extracted_premium += amount;
-
+        require(amount > 0, "There is no income to draw on");
+        userVotes[msg.sender][website][delivery_date]
+            .extracted_premium += amount;
     }
 
-    
-    function withdrawCompensate(string memory website,uint256 delivery_date) public {
+    function withdrawCompensate(string memory website, uint256 delivery_date)
+        public
+    {
         //提取池子内的赔付收入。
         require(delivery_date < block.timestamp, "Before time");
-        require(!userVotes[msg.sender][website][delivery_date].extracetd_compensate,"Only one claim can be made");
+        require(
+            !userVotes[msg.sender][website][delivery_date].extracetd_compensate,
+            "Only one claim can be made"
+        );
 
         uint256 user_can_withdraw_premium_up = 0;
         uint256 user_can_withdraw_premium_down = 0;
-        uint256 user_upvotes=0;
-        uint256 user_downvotes=0;
+        uint256 user_upvotes = 0;
+        uint256 user_downvotes = 0;
 
-        (user_upvotes,user_downvotes) = getUserDetails(msg.sender,website,delivery_date);
-        (user_can_withdraw_premium_up,user_can_withdraw_premium_down) = getUsersPrincipal(msg.sender,website,delivery_date);
-        uint256 amount = user_upvotes+ user_downvotes-user_can_withdraw_premium_up - user_can_withdraw_premium_down;
-        
+        (user_upvotes, user_downvotes) = getUserDetails(
+            msg.sender,
+            website,
+            delivery_date
+        );
+        (
+            user_can_withdraw_premium_up,
+            user_can_withdraw_premium_down
+        ) = getUsersPrincipal(msg.sender, website, delivery_date);
+        uint256 amount = user_upvotes +
+            user_downvotes -
+            user_can_withdraw_premium_up -
+            user_can_withdraw_premium_down;
+
         token.approve(msg.sender, amount);
         token.transfer(msg.sender, amount);
 
-        userVotes[msg.sender][website][delivery_date].extracetd_compensate = true;
-
+        userVotes[msg.sender][website][delivery_date]
+            .extracetd_compensate = true;
     }
-
-
 
     // function unlockTokens() public {
     //     // uint256 unlockedAmount = 0;
@@ -373,9 +753,6 @@ contract Voting {
     //     // emit TokensUnlocked(msg.sender, unlockedAmount);
     // }
 
-
-
-
     function get_trust_score() public view returns (uint256 trust_score1) {
         return trust_score;
     }
@@ -389,7 +766,10 @@ contract Voting {
         require(date > block.timestamp - 1000, "Date should be in the future");
         //require(date == 1688054400 || date == 1696003200 || date == 1703952000, "Date should be the end of the quarter");
         require(
-            date == 1682784000 || date == 1688054400 || date == 1696003200 || date == 1703952000,
+            date == 1682784000 ||
+                date == 1688054400 ||
+                date == 1696003200 ||
+                date == 1703952000,
             "Date should be the end of the quarter"
         );
         return true;
