@@ -45,3 +45,7 @@ node server.js
 ## 许可
 
 此项目根据 [MIT 许可](https://chat.openai.com/LICENSE) 发布。
+
+## 我们的联系方式
+
+wechat: hanxinnbbb
