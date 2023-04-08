@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract CDP {
+contract truthPool {
     using SafeMath for uint256;
 
     IERC20 public token;
@@ -14,7 +14,7 @@ contract CDP {
 
     //此版本每个池子共享一个对赌池，后期会升级为每一个池子一个对赌池并由factory合约控制。
 
-    //本实现应该会有tricky的实现方式，但是我们还没想到
+    //本实现应该会有tricky的实现方式，后期会对合约进行大范围优化
 
     //存储每个池子的每一笔交易信息
     struct poolTrade {
@@ -687,7 +687,7 @@ contract CDP {
         (
             user_can_withdraw_premium_up,
             user_can_withdraw_premium_down
-        ) = getUsersPrincipal(msg.sender, website, delivery_date);
+        ) = getUsersPremium(msg.sender, website, delivery_date);
         uint256 amount = user_can_withdraw_premium_up +
             user_can_withdraw_premium_down -
             userVotes[msg.sender][website][delivery_date].extracted_premium;
@@ -704,7 +704,7 @@ contract CDP {
     function withdrawCompensate(string memory website, uint256 delivery_date)
         public
     {
-        //提取池子内的赔付收入。
+        //提取池子内的赔付收入与剩余本金。
         require(delivery_date < block.timestamp, "Before time");
         require(
             !userVotes[msg.sender][website][delivery_date].extracetd_compensate,
@@ -716,7 +716,7 @@ contract CDP {
         uint256 user_upvotes = 0;
         uint256 user_downvotes = 0;
 
-        (user_upvotes, user_downvotes) = getUserDetails(
+        (user_upvotes, user_downvotes) = getUsersCompensate(
             msg.sender,
             website,
             delivery_date
@@ -724,7 +724,7 @@ contract CDP {
         (
             user_can_withdraw_premium_up,
             user_can_withdraw_premium_down
-        ) = getUsersPrincipal(msg.sender, website, delivery_date);
+        ) = getUsersPremium(msg.sender, website, delivery_date);
         uint256 amount = user_upvotes +
             user_downvotes -
             user_can_withdraw_premium_up -
@@ -776,5 +776,5 @@ contract CDP {
     }
 }
 
-//用户个人地址遍历？//
+//用户个人地址的遍历？//
 //一级域名正则化筛选？//
