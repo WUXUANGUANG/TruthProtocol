@@ -14,6 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.6.1/web3.min.js"></script>
     <!-- Add vue js-->
     <script src="https://unpkg.com/vue@next"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <style>
         body {
             background-color: #222;
@@ -137,7 +138,7 @@
                     <th scope="row">https://ftx.com/</th>
                     <td>1200</td>
                     <td>1000</td>
-                    <td>3h5min40s</td>
+                    <td>{{remainingTime}}</td>
                     <td>
                         <button class="btn btn-sm btn-connect" onclick="navigateToUrl('participate_arbitration.html')">参与仲裁</button>
                     </td>
@@ -150,6 +151,39 @@
         function navigateToUrl(url) {
         window.location.href = url
         }
+        const app = Vue.createApp({
+        data() {
+            return {
+                endTime: moment().add(12, 'hours').add(5, 'minutes').add(40, 'seconds'),
+                remainingTime: ''
+            }
+        },
+        mounted() {
+            this.updateRemainingTime()
+            setInterval(() => {
+                this.updateRemainingTime()
+            }, 1000)
+        },
+        methods: {
+            updateRemainingTime() {
+                const now = moment()
+                const diff = this.endTime.diff(now)
+
+                if (diff > 0) {
+                    const duration = moment.duration(diff)
+                    const hours = Math.floor(duration.asHours())
+                    const minutes = Math.floor(duration.minutes())
+                    const seconds = Math.floor(duration.seconds())
+
+                    this.remainingTime = `${hours}h${minutes}min${seconds}s`
+                } else {
+                    this.remainingTime = '0h0min0s'
+                }
+            }
+        }
+    })
+
+    app.mount('#app')
     </script>
 </body>
 </html>

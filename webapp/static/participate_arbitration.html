@@ -14,6 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.6.1/web3.min.js"></script>
     <!-- Add vue js-->
     <script src="https://unpkg.com/vue@next"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <style>
         body {
             background-color: #222;
@@ -148,7 +149,7 @@
                   <div class="text-success">
                     <h6 class="my-0">仲裁剩余时间:</h6>
                   </div>
-                  <span class="text-success">3h5min40s</span>
+                  <span class="text-success">{{remainingTime}}</span>
                 </li>
               </ul>
         </div>
@@ -182,6 +183,39 @@
     function navigateToUrl(url) {
         alert("参与仲裁成功")
         }
+        const app = Vue.createApp({
+        data() {
+            return {
+                endTime: moment().add(12, 'hours').add(5, 'minutes').add(35, 'seconds'),
+                remainingTime: ''
+            }
+        },
+        mounted() {
+            this.updateRemainingTime()
+            setInterval(() => {
+                this.updateRemainingTime()
+            }, 1000)
+        },
+        methods: {
+            updateRemainingTime() {
+                const now = moment()
+                const diff = this.endTime.diff(now)
+
+                if (diff > 0) {
+                    const duration = moment.duration(diff)
+                    const hours = Math.floor(duration.asHours())
+                    const minutes = Math.floor(duration.minutes())
+                    const seconds = Math.floor(duration.seconds())
+
+                    this.remainingTime = `${hours}h${minutes}min${seconds}s`
+                } else {
+                    this.remainingTime = '0h0min0s'
+                }
+            }
+        }
+    })
+
+    app.mount('#app')
 </script>
 </body>
 </html>
