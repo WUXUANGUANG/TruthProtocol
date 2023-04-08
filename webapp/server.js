@@ -422,7 +422,7 @@ app.get('/index', (req, res) => {
 });
 
 // 处理 GET /index 路径请求
-app.get('/person', (req, res) => {
+app.get('/user_info.html', (req, res) => {
   // 返回一个简单的 HTML 页面，显示个人信息
   res.sendFile(__dirname+"/static/user_info.html")
 });
