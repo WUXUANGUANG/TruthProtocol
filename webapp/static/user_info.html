@@ -126,7 +126,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(item,index) in websiteRank" :key="index">
+                <tr v-for="(item,index) in myWebsiteInfos" :key="index">
                     <th scope="row">{{index + 1}}</th>
                     <td>{{ item.url }}</td>
                     <td>{{ item.downvotes }}</td>
@@ -781,7 +781,7 @@
         const contractAddress = '0x1B92CfB91b0B4B35057aC877A4804e887b9cFD57';
         const erc20Address="0xB14D91Ca3EBDb73A6A9915bDee5c17b3dC2Bc3A8";
         const erc20Ticker="000000000000000000"
-        var host="http://truthpro.xyz:3001"
+        var host="http://127.0.0.1:3001"
         var deliveryDates=[1688054400,1696003200,1703952000]
         function getQueryStringParameters() {
             const queryString = window.location.search.substring(1);
@@ -887,6 +887,13 @@
                     let upvotesBN = web3.utils.toBN(0);
                     let downvotesBN = web3.utils.toBN(0);
 
+                    var updatedWebsiteRank = JSON.parse(JSON.stringify(this.websiteRank)); // 创建一个新的数组，用于存储累加后的websiteRank数据
+                    updatedWebsiteRank = updatedWebsiteRank.map((rank) => ({
+                    ...rank, // 保留原始数组中的其他属性
+                    upvotes: web3.utils.toBN(rank.upvotes),
+                    downvotes: web3.utils.toBN(rank.downvotes),
+                    }));
+                    console.log(updatedWebsiteRank)
                     try {
                         const promises = [];
 
@@ -902,6 +909,11 @@
                                         console.log(result); // 返回值为一个数组，包含用户的upvotes和downvotes
                                         upvotesBN = upvotesBN.add(web3.utils.toBN(result.upvotes));
                                         downvotesBN = downvotesBN.add(web3.utils.toBN(result.downvotes));
+                                        updatedWebsiteRank[i].upvotes = updatedWebsiteRank[i].upvotes.add(web3.utils.toBN(result.upvotes));
+                                        updatedWebsiteRank[i].downvotes = updatedWebsiteRank[i].downvotes.add(web3.utils.toBN(result.downvotes));
+                                        updatedWebsiteRank[i].url=websiteRank[i].url
+                                        updatedWebsiteRank[i].score=websiteRank[i].score
+                                        updatedWebsiteRank[i].pool_trade_times=websiteRank[i].pool_trade_times
                                     })
                                     .catch((error) => {
                                         console.error(error);
@@ -913,36 +925,23 @@
                         // 等待所有异步调用完成
                         await Promise.all(promises);
 
+                        updatedWebsiteRank=updatedWebsiteRank.map((rank) => ({
+                        ...rank,
+                        upvotes: parseFloat(rank.upvotes,toString()),
+                        downvotes: parseFloat(rank.downvotes.toString()),
+                        }));
+                        // 筛选累加结果不为零的条目
+                        this.myWebsiteInfos = updatedWebsiteRank.filter(
+                        (rank) => rank.upvotes!=0 || rank.downvotes!=0
+                        );
+
+
                         this.totalWebsiteInfo.upvotes =parseFloat(web3.utils.fromWei(upvotesBN, 'ether'));
                         this.totalWebsiteInfo.downvotes =parseFloat(web3.utils.fromWei(downvotesBN, 'ether')); 
                     } catch (error) {
                         alert("合约函数调用失败");
                         console.error('合约函数调用失败', error);
                     }
- 
-                    // let upvotesBN=web3.utils.BN(0)
-	                // let downvotesBN=web3.utils.BN(0)
-                    // try {
-                    //     for (var i=0;i<this.websiteRank.length;i++){
-                    //         console.log(this.websiteRank[i].url)
-                    //         for(var j=0;j<deliveryDates.length;j++){
-                    //             contract.methods.getUserDetails(currentAccount, this.websiteRank[i].url, deliveryDates[j]).call((error, result) => {
-                    //             if (error) {
-                    //                 console.error(error);
-                    //             } else {
-                    //                 console.log(result); // 返回值为一个数组，包含用户的upvotes和downvotes
-                    //                 upvotesBN=upvotesBN.add(web3.utils.BN(result.upvotes))
-                    //                 downvotesBN=downvotesBN.add(web3.utils.BN(result.downvotes))
-                    //             }
-                    //         });
-                    //         }
-                    //     }
-                    //     this.totalWebsiteInfo.upvotes=web3.utils.fromWei(upvotesBN, 'ether');
-                    //     this.totalWebsiteInfo.downvotes=web3.utils.fromWei(downvotesBN,'ether');
-                    // } catch (error) {
-                    //     alert("合约函数调用失败")
-                    //     console.error('合约函数调用失败', error);
-                    // }
                 },
                 async addBannedUrl() {
                     try {
