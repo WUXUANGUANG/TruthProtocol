@@ -4,7 +4,7 @@ const Web3 = require('web3');
 const erc20Ticker="000000000000000000"
 let rpc='https://rpc-mumbai.maticvigil.com/'
 rpc='https://alpha-rpc.scroll.io/l2'
-var bannedUrlList=['zor.com']
+var bannedUrlList=['zor.com','huobi.com','ftx.com','wizwu.eth','binance.com']
 //"https://www.google.com.hk/search?q=hardhat%E9%83%A8%E7%BD%B2%E5%88%B0%E6%B5%8B%E8%AF%95%E7%BD%91&newwindow=1&ei=Kl8sZJzOC_Ok2roPguy6qAU&ved=0ahUKEwici-b44JD-AhVzklYBHQK2DlUQ4dUDCA8&uact=5&oq=hardhat%E9%83%A8%E7%BD%B2%E5%88%B0%E6%B5%8B%E8%AF%95%E7%BD%91&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQAzIJCCEQoAEQChAqMgcIIRCgARAKMgcIIRCgARAKOgoIABBHENYEELADOhwIABCKBRDqAhC0AhCKAxC3AxDUAxDVAxDlAhgBOhkIABCKBRDqAhC0AhCKAxC3AxDUAxDlAhgBOgUIABCABDoLCAAQgAQQsQMQgwE6EQguEIAEELEDEIMBEMcBENEDOhQILhCABBCxAxCDARDHARDRAxDUAjoLCC4QgAQQsQMQgwE6CwgAEIoFELEDEIMBOg4ILhCABBCxAxCDARDUAjoECAAQAzoNCC4QigUQxwEQ0QMQQzoICAAQgAQQsQM6CwguEIMBELEDEIAEOg0IABCKBRCxAxCDARBDOgcIABCKBRBDOhMIABANEIAEELEDEIMBELEDEIMBOgcIABANEIAEOgcIABCABBAMOgUIABCiBDoFCCEQoAFKBAhBGABQmQRY2VZg3VdoB3ABeAGAAfABiAGDGJIBBzEwLjE1LjGYAQCgAQGwAQrIAQrAAQHaAQQIARgH&sclient=gws-wiz-serp"]
 
 const cors = require('cors');
