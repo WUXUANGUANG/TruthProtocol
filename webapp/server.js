@@ -400,6 +400,14 @@ fetchPoolDetails()
 setInterval(fetchPoolDetails,20000);
 
 const app = express();
+app.use(cors());
+
+const corsOptions = {
+  origin: 'http://truthpro.xyz',
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
+app.use(cors(corsOptions));
 
 
 function getBannedUrlList(){
